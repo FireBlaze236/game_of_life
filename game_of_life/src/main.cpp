@@ -1,6 +1,9 @@
 #include <iostream>
 #include <memory>
 #include <glad/glad.h>
+#include <glm/matrix.hpp>
+#include <glm/ext/matrix_transform.hpp>
+#include <glm/ext/matrix_clip_space.hpp> 
 
 #include "Window.h"
 
@@ -25,6 +28,8 @@ int main()
         0.0f, 1.0f,
         1.0f, 0.0f
     };
+    glm::mat4 proj = glm::ortho(0, window->GetWidth(), 0, window->GetHeight());
+    
 
     unsigned int vao;
     glGenVertexArrays(1, &vao);
