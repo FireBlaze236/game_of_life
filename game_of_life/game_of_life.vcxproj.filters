@@ -39,4 +39,8 @@
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
+  <ItemGroup>
+    <CopyFileToFolders Include="shaders\fragment.glsl" />
+    <CopyFileToFolders Include="shaders\vertex.glsl" />
+  </ItemGroup>
 </Project>
