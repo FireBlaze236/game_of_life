@@ -89,6 +89,25 @@ void Shader::CompileShaders()
 	glDeleteShader(fragmentShader);
 }
 
+unsigned int Shader::GetUniformLocation(const std::string& name)
+{
+	if (uniformMap.find(name) != uniformMap.end())
+	{
+		return uniformMap[name];
+	}
+	unsigned int id = glGetUniformLocation(m_RendererId, name.c_str());
+	if (id != -1)
+	{
+		uniformMap[name] = id;
+		return id;
+	}
+	else
+	{
+		GL_LOG("Uniform location does not exist" + name);
+		return -1;
+	}
+}
+
 Shader::Shader(const std::string& vertexShaderPath, const std::string& fragmentShaderPath)
 {
 	vertexShaderSource = ParseShader(vertexShaderPath);
@@ -105,4 +124,12 @@ void Shader::Bind()
 		compiled = true;
 	}
 	glUseProgram(m_RendererId);
+}
+
+void Shader::SetUniformMat4f(const std::string& uniformName, glm::mat4& mat)
+{
+	unsigned int location = GetUniformLocation(uniformName);
+	
+	glUniformMatrix4fv(location, 1, GL_FALSE, &mat[0][0]);
+
 }

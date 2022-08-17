@@ -24,11 +24,11 @@ int main()
 
     //Data
     float vertices[] = {
-        0.0f, 0.0f,
-        0.0f, 1.0f,
-        1.0f, 0.0f
+        0.0f, 0.0f, 0.0f,
+        0.0f, 500.0f, 0.0f,
+        500.0f, 0.0f, 0.0f
     };
-    glm::mat4 proj = glm::ortho(0, window->GetWidth(), 0, window->GetHeight());
+    glm::mat4 proj = glm::ortho(0.0f, (float) window->GetWidth(), 0.0f, (float)window->GetHeight());
     
 
     unsigned int vao;
@@ -39,12 +39,14 @@ int main()
     glGenBuffers(1, &vbo);
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
 
     Shader shader("shaders/vertex.glsl", "shaders/fragment.glsl");
 
     shader.Bind();
+
+    
 
     //Main Loop
     while (!window->isClosing())
@@ -52,6 +54,7 @@ int main()
         glBindVertexArray(vao);
         glClear(GL_COLOR_BUFFER_BIT);
 
+        shader.SetUniformMat4f("proj", proj);
         glBindBuffer(GL_ARRAY_BUFFER, vbo);
         glDrawArrays(GL_TRIANGLES, 0, 3);
 
