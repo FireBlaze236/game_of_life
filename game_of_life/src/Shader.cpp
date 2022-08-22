@@ -1,5 +1,5 @@
 #include "Shader.h"
-
+#include "glm/gtc/type_ptr.hpp"
 
 std::string Shader::ParseShader(const std::string& inputFilePath)
 {
@@ -125,6 +125,28 @@ void Shader::Bind()
 	}
 	glUseProgram(m_RendererId);
 }
+
+void Shader::SetUniformVec3f(const std::string& uniformName, glm::vec3& vec)
+{
+	unsigned int location = GetUniformLocation(uniformName);
+
+	glUniform3f(location, vec[0], vec[1], vec[2]);
+}
+
+void Shader::SetUniform1f(const std::string& uniformName, float val)
+{
+	unsigned int location = GetUniformLocation(uniformName);
+
+	glUniform1f(location, val);
+}
+
+void Shader::SetUniformVec3fv(const std::string& uniformName, std::vector<glm::vec3>& val)
+{
+	unsigned int location = GetUniformLocation(uniformName);
+
+	glUniform3fv(location, val.size(), glm::value_ptr(val[0]));
+}
+
 
 void Shader::SetUniformMat4f(const std::string& uniformName, glm::mat4& mat)
 {

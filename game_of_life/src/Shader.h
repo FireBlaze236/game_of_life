@@ -27,6 +27,10 @@ public:
 
 public:
 	void Bind();
+	void SetUniformVec3f(const std::string& uniformName, glm::vec3& vec);
+	void SetUniform1f(const std::string& uniformName, float val);
+
+	void SetUniformVec3fv(const std::string& uniformName, std::vector<glm::vec3>& val);
 
 	void SetUniformMat4f(const std::string& uniformName, glm::mat4& mat);
 	void SetUniformVec4f(const std::string& uniformName, glm::vec4& vec);
