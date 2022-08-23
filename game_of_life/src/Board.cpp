@@ -12,11 +12,13 @@ Cell* Board::GetCell(std::vector<std::vector<Cell>>& board, int i, int j)
 
 void Board::Debug()
 {
-	for (int i = 0; i < board_cells.size(); i++)
+	for (int i = 0; i < main_board.size(); i++)
 	{
-		for (int j = 0; j < board_cells[i].size(); j++)
+		for (int j = 0; j < main_board[i].size(); j++)
 		{
-			std::cout << debug_count_neighbours(board_cells[i][j]) << " ";
+			Cell cell = main_board[i][j];
+			//std::cout << main_board[i][j].active << " ";
+			
 		}
 		std::cout << std::endl;
 	}
@@ -25,12 +27,12 @@ void Board::Debug()
 std::vector<std::vector<int>> Board::GetIntegerRep(CELL_TYPE type)
 {
 	std::vector<std::vector<int>> res;
-	for (int i = 0; i < board_cells.size(); i++)
+	for (int i = 0; i < main_board.size(); i++)
 	{
 		std::vector<int> v;
-		for (int j = 0; j < board_cells[i].size(); j++)
+		for (int j = 0; j < main_board[i].size(); j++)
 		{
-			if (board_cells[i][j].type == type && board_cells[i][j].active)
+			if (main_board[i][j].type == type && main_board[i][j].active)
 				v.push_back(1);
 			else
 				v.push_back(0);
@@ -43,29 +45,91 @@ std::vector<std::vector<int>> Board::GetIntegerRep(CELL_TYPE type)
 
 void Board::SetCellActive(int i, int j, bool val)
 {
-	if (i < 0 || i >= board_cells.size()) return;
-	if (j < 0 || j >= board_cells[i].size()) return;
-	board_cells[i][j].active = val;
+	if (i < 0 || i >= main_board.size()) return;
+	if (j < 0 || j >= main_board[i].size()) return;
+	main_board[i][j].active = val;
 }
 
 bool Board::GetCellActive(int i, int j)
 {
-	if (i < 0 || i >= board_cells.size()) return false;
-	if (j < 0 || j >= board_cells[i].size()) return false;
-	return board_cells[i][j].active;
+	if (i < 0 || i >= main_board.size()) return false;
+	if (j < 0 || j >= main_board[i].size()) return false;
+	return main_board[i][j].active;
 }
 
 void Board::Update()
 {
-	for (int i = 0; i < board_cells.size(); i++)
+	PopulateBoardNeighbours(main_board);
+	std::vector<std::vector<Cell>> buffer_board;
+	for (int i = 0; i < main_board.size(); i++)
 	{
-		for (int j = 0; j < board_cells[i].size(); j++)
+		std::vector<Cell> temp;
+		for (int j = 0; j < main_board[i].size(); j++)
 		{
-			function_map[board_cells[i][j].type](board_cells[i][j], buffer_board[i][j]);
+			Cell c = function_map[main_board[i][j].type](main_board[i][j]);
+			temp.push_back(c);
 		}
+
+		buffer_board.push_back(temp);
 	}
 
-	board_cells.swap(buffer_board);
+	main_board.swap(buffer_board);
+
+	
+}
+
+std::vector<int> Board::GetIntegerRepFlat(CELL_TYPE type)
+{
+	std::vector<int> v;
+	for (int i = 0; i < main_board.size(); i++)
+	{
+		
+		for (int j = 0; j < main_board[i].size(); j++)
+		{
+			if (main_board[i][j].type == type && main_board[i][j].active)
+				v.push_back(1);
+			else
+				v.push_back(0);
+		}
+		
+	}
+
+	return v;
+}
+
+std::vector<int> Board::GetIntegerRepFlatAll()
+{
+	std::vector<int> v;
+	for (int i = 0; i < main_board.size(); i++)
+	{
+
+		for (int j = 0; j < main_board[i].size(); j++)
+		{
+			if (main_board[i][j].active)
+				v.push_back(1);
+			else
+				v.push_back(0);
+		}
+
+	}
+
+	return v;
+}
+
+void Board::SetCellType(int i, int j, CELL_TYPE newType)
+{
+	Cell* c = GetCell(main_board, i, j);
+	
+	if (c != nullptr) c->type = newType;
+}
+
+CELL_TYPE Board::GetCellType(int i, int j)
+{
+	Cell* c = GetCell(main_board, i, j);
+
+	if (c != nullptr) return c->type;
+	else
+		return CELL_TYPE::INVALID;
 }
 
 
@@ -95,8 +159,7 @@ Board::Board(int x, int y)
 	: width(x), height(y)
 {
 	//Create the cells
-	board_cells = std::vector<std::vector<Cell>>();
-	buffer_board = std::vector<std::vector<Cell>>();
+	main_board = std::vector<std::vector<Cell>>();
 
 	for (int i = 0; i < height; i++)
 	{
@@ -108,13 +171,12 @@ Board::Board(int x, int y)
 			b.push_back(Cell());
 		}
 
-		board_cells.push_back(v);
-		buffer_board.push_back(b);
+		main_board.push_back(v);
+
 	}
 
 	//Populate cell neighbours
-	PopulateBoardNeighbours(board_cells);
-	PopulateBoardNeighbours(buffer_board);
+	PopulateBoardNeighbours(main_board);
 	
 
 	//SET THE FUNCTION MAPS
