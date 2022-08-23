@@ -147,6 +147,13 @@ void Shader::SetUniformVec3fv(const std::string& uniformName, std::vector<glm::v
 	glUniform3fv(location, val.size(), glm::value_ptr(val[0]));
 }
 
+void Shader::SetUniform1iv(const std::string& uniformName, std::vector<int>& vals)
+{
+	unsigned int location = GetUniformLocation(uniformName);
+
+	glUniform1iv(location, vals.size(), &vals[0]);
+}
+
 
 void Shader::SetUniformMat4f(const std::string& uniformName, glm::mat4& mat)
 {

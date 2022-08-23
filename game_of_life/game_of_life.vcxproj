@@ -145,12 +145,16 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\Board.cpp" />
+    <ClCompile Include="src\Automata.cpp" />
     <ClCompile Include="src\Shader.cpp" />
     <ClCompile Include="src\glad.c" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\Window.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\Board.h" />
+    <ClInclude Include="src\Automata.h" />
     <ClInclude Include="src\Shader.h" />
     <ClInclude Include="src\Util.h" />
     <ClInclude Include="src\Window.h" />

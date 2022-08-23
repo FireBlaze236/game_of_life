@@ -31,6 +31,7 @@ public:
 	void SetUniform1f(const std::string& uniformName, float val);
 
 	void SetUniformVec3fv(const std::string& uniformName, std::vector<glm::vec3>& val);
+	void SetUniform1iv(const std::string& uniformName, std::vector<int>& vals);
 
 	void SetUniformMat4f(const std::string& uniformName, glm::mat4& mat);
 	void SetUniformVec4f(const std::string& uniformName, glm::vec4& vec);

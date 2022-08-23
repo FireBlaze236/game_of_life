@@ -7,6 +7,110 @@
 
 #include "Window.h"
 #include "Shader.h"
+#include "Board.h"
+
+
+template<typename T>
+std::vector<T> flatten(std::vector<std::vector<T>>& orig)
+{
+    std::vector<T> v;
+    for (const auto& x : orig)
+    {
+        v.insert(v.end(), x.begin(), x.end());
+    }
+
+    return v;
+}
+
+
+
+std::vector<std::vector<int>> visible = {
+        {1, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 1, 1, 0, 0, 0, 0, 0, 0, 0},
+        {1, 1, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 1, 1, 0, 0},
+        {0, 0, 0, 0, 0, 0, 1, 0, 1, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 1, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 1, 1},
+        
+};
+
+int checkNeighbour(int i, int j, int w, int h)
+{
+    if (i < 0 || i >= h) return 0;
+    if (j < 0 || j >= w) return 0;
+
+    return visible[i][j];
+}
+
+void update()
+{
+    std::vector<std::vector<int>> nv;
+    for (int i = 0; i < visible.size(); i++)
+    {
+
+        std::vector<int> v;
+        for (int j = 0; j < visible[i].size(); j++)
+        {
+            int cnt = 0;
+            cnt += checkNeighbour(i + 1, j, visible.size(), visible[i].size());
+            cnt += checkNeighbour(i - 1, j, visible.size(), visible[i].size());
+            cnt += checkNeighbour(i, j + 1, visible.size(), visible[i].size());
+            cnt += checkNeighbour(i, j - 1, visible.size(), visible[i].size());
+
+            cnt += checkNeighbour(i+1, j + 1, visible.size(), visible[i].size());
+            cnt += checkNeighbour(i-1, j - 1, visible.size(), visible[i].size());
+            cnt += checkNeighbour(i+1, j - 1, visible.size(), visible[i].size());
+            cnt += checkNeighbour(i-1, j + 1, visible.size(), visible[i].size());
+
+            if (visible[i][j] == 1)
+            {
+                if (cnt == 2 || cnt == 3)
+                {
+                    v.push_back(1);
+                }
+                else
+                {
+                    v.push_back(0);
+                }
+            }
+            else if (visible[i][j] == 0)
+            {
+                if (cnt == 3)
+                {
+                    v.push_back(1);
+                }
+                else
+                {
+                    v.push_back(0);
+                }
+            }
+
+            
+            //std::cout << cnt << " ";
+        }
+
+        nv.push_back(v);
+        //std::cout << std::endl;
+    }
+
+    visible = nv;
+    
+}
+
+Board board(10, 10);
+
+void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
+{
+    if (key == GLFW_KEY_SPACE && action == GLFW_PRESS)
+    {
+        board.Update();
+        board.Debug();
+    }
+}
 
 int main()
 {
@@ -20,7 +124,7 @@ int main()
     //Window
     std::unique_ptr<Window> window(new Window());
     window->MakeCurrent();
-
+    glfwSetKeyCallback(window->GetPtr(), key_callback);
 
     //Data
     float vertices[] = {
@@ -36,8 +140,8 @@ int main()
     };
 
     std::vector<glm::vec3> positions;
+    
     int w = 10, h = 10;
-    float scale = 0.9f;
     for (int i = 0; i < h; i++)
     {
         for (int j = 0; j < w; j++)
@@ -45,6 +149,8 @@ int main()
             positions.push_back(
                 glm::vec3(j, i, 0)
             );
+
+            //visible.push_back(1);
         }
     }
 
@@ -75,6 +181,12 @@ int main()
     shader.Bind();
 
     
+    board.SetCellActive(2, 1, true);
+    board.SetCellActive(2, 2, true);
+    board.SetCellActive(2, 3, true);
+    board.Debug();
+    
+
 
     //Main Loop
     while (!window->isClosing())
@@ -87,6 +199,9 @@ int main()
         //glDrawArrays(GL_TRIANGLES, 0, 3);
         //glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, NULL);
         shader.SetUniformMat4f("proj", proj);
+        auto varr = board.GetIntegerRep(CELL_TYPE::CONWAY);
+        auto vis = flatten(varr);
+        shader.SetUniform1iv("visible", vis);
         /*for (int i = 0; i < positions.size(); i++)
         {
             shader.SetUniformVec3f("positions[" + std::to_string(i) + "]",
