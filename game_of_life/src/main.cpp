@@ -31,19 +31,30 @@ std::vector<T> flatten(std::vector<std::vector<T>>& orig)
 
 Board board(20, 20);
 bool running = false;
+double delay = 0.1;
 
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
     if (action == GLFW_PRESS)
     {
-        if (key == GLFW_KEY_SPACE)
+        switch (key)
         {
+        case GLFW_KEY_SPACE:
             running = !running;
-        }
-
-        else if (key == GLFW_KEY_C)
-        {
+            break;
+        case GLFW_KEY_C:
             board.Clear();
+            break;
+        case GLFW_KEY_PERIOD:
+            delay -= 0.02;
+            delay = std::max(delay, 0.01);
+            break;
+        case GLFW_KEY_COMMA:
+            delay += 0.02;
+            delay = std::min(delay, 1.00);
+            break;
+        default:
+            break;
         }
     }
     
@@ -176,7 +187,7 @@ int main()
 
     
     using namespace std::chrono;
-    double delay = 0.1;
+    
     auto prev = steady_clock::now();
     auto now = steady_clock::now();
 
