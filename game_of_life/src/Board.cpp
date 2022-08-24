@@ -12,15 +12,27 @@ Cell* Board::GetCell(std::vector<std::vector<Cell>>& board, int i, int j)
 
 void Board::Debug()
 {
-	for (int i = 0; i < main_board.size(); i++)
+	/*for (int i = 0; i < main_board.size(); i++)
 	{
 		for (int j = 0; j < main_board[i].size(); j++)
 		{
 			Cell cell = main_board[i][j];
-			//std::cout << main_board[i][j].active << " ";
+			std::cout << main_board[i][j].active << " ";
 			
 		}
 		std::cout << std::endl;
+	}*/
+}
+
+void Board::Clear()
+{
+
+	for (int i = 0; i < main_board.size(); i++)
+	{
+		for (int j = 0; j < main_board[i].size(); j++)
+		{
+			main_board[i][j].active = false;
+		}
 	}
 }
 

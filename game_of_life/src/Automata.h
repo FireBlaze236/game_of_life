@@ -17,7 +17,7 @@ Cell ConwayUpdateFunctions(const Cell& cell)
 
 	int count = 0;
 	auto count_cell = [](Cell p, Cell* c) {
-		if (c != nullptr && c->type == p.type && c->active) return 1;
+		if (c != nullptr /* && c->type == p.type*/ && c->active) return 1;
 		else return 0;
 	};
 

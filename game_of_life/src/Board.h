@@ -14,19 +14,6 @@ enum class CELL_TYPE {
 	INVALID
 };
 
-enum class DIRECTION {
-	RIGHT = 0,
-	LEFT,
-	UP,
-	DOWN,
-	UP_LEFT,
-	UP_RIGHT,
-	DOWN_LEFT,
-	DOWN_RIGHT,
-};
-
-
-
 
 
 struct Cell {
@@ -80,6 +67,8 @@ public:
 	CELL_TYPE GetCellType(int i, int j);
 
 	void Update();
+
+	void Clear();
 };
 
 

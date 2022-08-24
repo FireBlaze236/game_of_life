@@ -14,7 +14,7 @@ Window::Window(int width, int height, std::string title)
     }
 }
 Window::Window()
-    : Window(640, 480, "Default")
+    : Window(SCREEN_W, SCREEN_H, "Default")
 {
     
 }
