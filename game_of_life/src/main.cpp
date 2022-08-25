@@ -27,7 +27,7 @@ std::vector<T> flatten(std::vector<std::vector<T>>& orig)
 
 
 
-Board board(20, 20);
+Board board(50, 50);
 CELL_TYPE placement_type = CELL_TYPE::SOLID;
 bool running = false;
 bool spawning = false;
@@ -85,6 +85,12 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
             break;
         case GLFW_KEY_3:
             placement_type = CELL_TYPE::SAND;
+            break;
+        case GLFW_KEY_4:
+            placement_type = CELL_TYPE::WATER;
+            break;
+        case GLFW_KEY_5:
+            placement_type = CELL_TYPE::BLANK;
             break;
         default:
             break;

@@ -93,6 +93,9 @@ void Board::Update()
 				break;
 			case CELL_TYPE::SOLID:
 				break;
+			case CELL_TYPE::WATER:
+				UpdateWater(main_board[i][j]);
+				break;
 			}
 		}
 	}
@@ -167,7 +170,7 @@ void Board::UpdateSand(Cell& cell)
 	
 	if (cell.d != nullptr && cell.d->GetType() == CELL_TYPE::BLANK)
 	{
-		int g = 3;
+		int g = 7;
 		Cell* c = &cell;
 		Cell* d = cell.d;
 		while (g != 0 && d != nullptr && d->GetType() == CELL_TYPE::BLANK)
@@ -182,7 +185,7 @@ void Board::UpdateSand(Cell& cell)
 	}
 	else if (cell.dl != nullptr && cell.dl->GetType() == CELL_TYPE::BLANK)
 	{
-		int g = 1;
+		int g = 2;
 		Cell* c = &cell;
 		Cell* d = cell.dl;
 		while (g != 0 && d != nullptr && d->GetType() == CELL_TYPE::BLANK)
@@ -197,7 +200,7 @@ void Board::UpdateSand(Cell& cell)
 	}
 	else if (cell.dr != nullptr && cell.dr->GetType() == CELL_TYPE::BLANK)
 	{
-		int g = 1;
+		int g = 2;
 		Cell* c = &cell;
 		Cell* d = cell.dr;
 		while (g != 0 && d != nullptr && d->GetType() == CELL_TYPE::BLANK)
@@ -212,6 +215,86 @@ void Board::UpdateSand(Cell& cell)
 	}
 
 	cell.updated = true;
+}
+
+void Board::UpdateWater(Cell& cell)
+{
+	if (cell.GetType() != CELL_TYPE::WATER) return;
+
+	bool init_cond = false;
+
+	if (cell.d != nullptr && cell.d->GetType() == CELL_TYPE::BLANK)
+	{
+		int g = 7;
+		Cell* c = &cell;
+		Cell* d = cell.d;
+		while (g != 0 && d != nullptr && d->GetType() == CELL_TYPE::BLANK)
+		{
+			if (d->updated) break;
+			d->updated = true;
+			c = d;
+			d = d->d;
+			g--;
+		}
+		MoveCell(&cell, c);
+		cell.updated = true;
+		return;
+	}
+	else if (cell.dl != nullptr && cell.dl->GetType() == CELL_TYPE::BLANK)
+	{
+		int g = 2;
+		Cell* c = &cell;
+		Cell* d = cell.dl;
+		while (g != 0 && d != nullptr && d->GetType() == CELL_TYPE::BLANK)
+		{
+			if (d->updated) break;
+			d->updated = true;
+			c = d;
+			d = d->dl;
+			g--;
+		}
+		MoveCell(&cell, c);
+		cell.updated = true;
+		return;
+	}
+	else if (cell.dr != nullptr && cell.dr->GetType() == CELL_TYPE::BLANK)
+	{
+		int g = 2;
+		Cell* c = &cell;
+		Cell* d = cell.dr;
+		while (g != 0 && d != nullptr && d->GetType() == CELL_TYPE::BLANK)
+		{
+			if (d->updated) break;
+			d->updated = true;
+			c = d;
+			d = d->dr;
+			g--;
+		}
+		MoveCell(&cell, c);
+		cell.updated = true;
+		return;
+	}
+
+	if (cell.l != nullptr)
+	{
+		if (cell.l->GetType() == CELL_TYPE::BLANK)
+		{
+			MoveCell(&cell, cell.l);
+		}
+		cell.updated = true;
+		cell.l->updated = true;
+	}
+	if (cell.r != nullptr)
+	{
+		if (cell.r->GetType() == CELL_TYPE::BLANK)
+		{
+			MoveCell(&cell, cell.r);
+		}
+			
+		cell.updated = true;
+		cell.r->updated = true;
+	}
+
 }
 
 

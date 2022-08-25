@@ -14,7 +14,8 @@ enum class CELL_TYPE {
 	CONWAY,
 	SAND, 
 	INVALID,
-	BLANK
+	BLANK,
+	WATER
 };
 
 
@@ -23,6 +24,7 @@ struct Cell {
 private:
 
 public:
+	int flow_dir = -1;
 	bool enabled = true;
 	bool updated = false;
 	Cell *l, *r, *u, *d, *ul, *ur, *dl, *dr;
@@ -65,7 +67,8 @@ private:
 	{
 		{CELL_TYPE::SOLID, glm::vec3(1.0f, 1.0f, 1.0f)},
 		{CELL_TYPE::CONWAY, glm::vec3(0.0f, 1.0f, 0.0f)},
-		{CELL_TYPE::SAND, glm::vec3(0.5f, 0.3f, 0.2f)}
+		{CELL_TYPE::SAND, glm::vec3(0.5f, 0.3f, 0.2f)},
+		{CELL_TYPE::WATER, glm::vec3(0.1f, 0.1f, 0.8f)},
 	};
 
 	void PopulateBoardNeighbours(std::vector<std::vector<Cell>>& board);
@@ -97,6 +100,7 @@ public:
 
 	void UpdateConwayGeneration();
 	void UpdateSand(Cell& cell);
+	void UpdateWater(Cell& cell);
 
 	void Clear();
 };
