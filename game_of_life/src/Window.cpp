@@ -6,7 +6,7 @@ Window::Window(int width, int height, std::string title)
     this->width = width;
     this->height = height;
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     m_WindowPtr = glfwCreateWindow(width, height, title.c_str(), 0, 0);
     if (!m_WindowPtr)
     {
@@ -14,7 +14,7 @@ Window::Window(int width, int height, std::string title)
     }
 }
 Window::Window()
-    : Window(640, 480, "Default")
+    : Window(SCREEN_W, SCREEN_H, "Default")
 {
     
 }
