@@ -7,22 +7,26 @@
 
 #include "Shader.h"
 
+
+
 enum class CELL_TYPE {
 	SOLID,
 	CONWAY,
 	SAND, 
-	INVALID
+	INVALID,
+	BLANK
 };
 
 
 
 struct Cell {
-public:
+private:
 
+public:
 	bool enabled = true;
-	bool active = false;
+	bool updated = false;
 	Cell *l, *r, *u, *d, *ul, *ur, *dl, *dr;
-	CELL_TYPE type = CELL_TYPE::CONWAY;
+	CELL_TYPE type = CELL_TYPE::BLANK;
 	Cell(){
 		l = r = u = d = ul = ur = dl = dr = nullptr;
 	}
@@ -33,23 +37,46 @@ public:
 		this->type = type;
 	}
 
+	void SetType(CELL_TYPE nt)
+	{
+		type = nt;
+	}
+
+	CELL_TYPE GetType()
+	{
+		return type;
+	}
+
+
 	
 };
+typedef std::vector<std::vector<Cell>>(*BoardUpdateFunction) (const std::vector<std::vector<Cell>>&);
 
-typedef Cell (*CellUpdateFunction) (const Cell&);
 
 class Board
 {
 private:
 	int width,height;
 	std::vector<std::vector<Cell>> main_board;
-	std::unordered_map<CELL_TYPE, CellUpdateFunction> function_map;
+
+	std::vector<glm::vec3> positions;
+	std::vector<glm::vec3> cols;
+	std::map<CELL_TYPE, glm::vec3> col_map =
+	{
+		{CELL_TYPE::SOLID, glm::vec3(1.0f, 1.0f, 1.0f)},
+		{CELL_TYPE::CONWAY, glm::vec3(0.0f, 1.0f, 0.0f)},
+		{CELL_TYPE::SAND, glm::vec3(0.5f, 0.3f, 0.2f)}
+	};
 
 	void PopulateBoardNeighbours(std::vector<std::vector<Cell>>& board);
+	void UpdateCellPositionsAndColors();
+
+	void MoveCell(Cell* src, Cell* dest);
+
 public:
 	Board(int x, int y);
 	Cell* GetCell(std::vector<std::vector<Cell>>& board, int i, int j);
-
+	Cell* GetMainBoardCell(int i, int j);
 	void Debug();
 
 
@@ -60,13 +87,16 @@ public:
 	std::vector<int> GetIntegerRepFlat(CELL_TYPE type);
 	std::vector<int> GetIntegerRepFlatAll();
 
-	void SetCellActive(int i, int j, bool val);
-	bool GetCellActive(int i, int j);
-
 	void SetCellType(int i, int j, CELL_TYPE new_type);
 	CELL_TYPE GetCellType(int i, int j);
 
+	std::vector<glm::vec3>& GetAllCellPositions() { UpdateCellPositionsAndColors(); return positions; }
+	std::vector<glm::vec3>& GetAllCellColors() { UpdateCellPositionsAndColors(); return cols; }
+
 	void Update();
+
+	void UpdateConwayGeneration();
+	void UpdateSand(Cell& cell);
 
 	void Clear();
 };

@@ -13,8 +13,6 @@
 #include "Board.h"
 
 
-#define TICKS_PER_SEC 60
-
 template<typename T>
 std::vector<T> flatten(std::vector<std::vector<T>>& orig)
 {
@@ -30,8 +28,28 @@ std::vector<T> flatten(std::vector<std::vector<T>>& orig)
 
 
 Board board(20, 20);
+CELL_TYPE placement_type = CELL_TYPE::SOLID;
 bool running = false;
+bool spawning = false;
 double delay = 0.1;
+
+void SpawnParticles(GLFWwindow* window)
+{
+    double x, y;
+    glfwGetCursorPos(window, &x, &y);
+    int wx, wy;
+    glfwGetWindowSize(window, &wx, &wy);
+
+    double i = x / wx;
+    double j = y / wy;
+    i *= board.GetWidth();
+    j *= board.GetHeight();
+    int p = std::floor(i);
+    int q = std::floor(j);
+
+    
+    board.SetCellType(q, p, placement_type);
+}
 
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
@@ -41,6 +59,10 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
         {
         case GLFW_KEY_SPACE:
             running = !running;
+            
+            break;
+        case GLFW_KEY_D:
+            board.Debug();
             break;
         case GLFW_KEY_C:
             board.Clear();
@@ -53,6 +75,17 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
             delay += 0.02;
             delay = std::min(delay, 1.00);
             break;
+
+        case GLFW_KEY_1:
+            placement_type = CELL_TYPE::SOLID;
+            std::cout << "1" << std::endl;
+            break;
+        case GLFW_KEY_2:
+            placement_type = CELL_TYPE::CONWAY;
+            break;
+        case GLFW_KEY_3:
+            placement_type = CELL_TYPE::SAND;
+            break;
         default:
             break;
         }
@@ -64,21 +97,11 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 {
     if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS)
     {
-        double x, y;
-        glfwGetCursorPos(window, &x, &y);
-        
-
-        double i = x / SCREEN_W;
-        double j = y / SCREEN_H;
-        i *= board.GetWidth();
-        j *= board.GetHeight();
-        int p = std::floor(i);
-        int q = std::floor(j);
-        //std::cout << std::floor(i) << " " << std::floor(j) << std::endl;
-
-
-        board.SetCellActive(q, p, true);
-
+        spawning = true;
+    }
+    if(spawning && button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_RELEASE)
+    {
+        spawning = false;
     }
 }
 
@@ -92,7 +115,7 @@ int main()
         return -1;
     }
     //Window
-    std::unique_ptr<Window> window(new Window());
+    std::unique_ptr<Window> window(new Window(640, 480, "Automata"));
     window->MakeCurrent();
     glfwSetKeyCallback(window->GetPtr(), key_callback);
     glfwSetMouseButtonCallback(window->GetPtr(), mouse_button_callback);
@@ -110,34 +133,6 @@ int main()
         1, 3 , 2
     };
 
-    
-    
-
-    
-
-    std::vector<glm::vec3> positions;
-    std::vector<glm::vec3> cols;
-    std::map<CELL_TYPE, glm::vec3> col_map =
-    {
-        {CELL_TYPE::SOLID, glm::vec3(1.0f, 1.0f, 1.0f)},
-        {CELL_TYPE::CONWAY, glm::vec3(0.0f, 1.0f, 0.0f)}
-    };
-    
-    for (int i = 0; i < board.GetHeight(); i++)
-    {
-        for (int j = 0; j < board.GetWidth(); j++)
-        {
-            positions.push_back(
-                glm::vec3(j, i, 0)
-            );
-
-            CELL_TYPE t = board.GetCellType(i, j);
-            cols.push_back(col_map[t]);
-        }
-    }
-
-
-    
     glm::mat4 proj = glm::ortho(0.0f, (float)board.GetWidth(), (float)board.GetHeight(), 0.0f);
     
 
@@ -145,21 +140,21 @@ int main()
     glGenVertexArrays(1, &vao);
     glBindVertexArray(vao);
 
-    unsigned int vbo;
+    unsigned int vertexVBO;
     glEnableVertexAttribArray(0);
-    glGenBuffers(1, &vbo);
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    glGenBuffers(1, &vertexVBO);
+    glBindBuffer(GL_ARRAY_BUFFER, vertexVBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
     
 
-    unsigned int instanceVBO;
-    glGenBuffers(1, &instanceVBO);
-    glBindBuffer(GL_ARRAY_BUFFER, instanceVBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * positions.size(), &positions[0], GL_STATIC_READ);
+    unsigned int positionVBO;
+    glGenBuffers(1, &positionVBO);
+    glBindBuffer(GL_ARRAY_BUFFER, positionVBO);
+    //glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * positions.size(), &positions[0], GL_STATIC_READ);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glEnableVertexAttribArray(1);
-    glBindBuffer(GL_ARRAY_BUFFER, instanceVBO);
+    glBindBuffer(GL_ARRAY_BUFFER, positionVBO);
     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glVertexAttribDivisor(1, 1);
@@ -167,7 +162,7 @@ int main()
     unsigned int colorVBO;
     glGenBuffers(1, &colorVBO);
     glBindBuffer(GL_ARRAY_BUFFER, colorVBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * cols.size(), &cols[0], GL_STATIC_READ);
+    
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glEnableVertexAttribArray(2);
     glBindBuffer(GL_ARRAY_BUFFER, colorVBO);
@@ -198,16 +193,25 @@ int main()
         glClear(GL_COLOR_BUFFER_BIT);
 
         std::vector<int> vis = board.GetIntegerRepFlatAll();
+        std::vector<glm::vec3> positions = board.GetAllCellPositions();
+        std::vector<glm::vec3> cols = board.GetAllCellColors();
+
+        shader.Bind();
+        
         for (int i = 0; i < vis.size(); i++ )
         {
             positions[i].z = vis[i];
         }
-        glBindBuffer(GL_ARRAY_BUFFER, instanceVBO);
+        
+
+        glBindBuffer(GL_ARRAY_BUFFER, vertexVBO);
+        shader.SetUniformMat4f("proj", proj);
+
+        glBindBuffer(GL_ARRAY_BUFFER, positionVBO);
         glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * positions.size(), &positions[0], GL_STATIC_DRAW);
 
-        glBindBuffer(GL_ARRAY_BUFFER, vbo);
-
-        shader.SetUniformMat4f("proj", proj);
+        glBindBuffer(GL_ARRAY_BUFFER, colorVBO);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * cols.size(), &cols[0], GL_STATIC_READ);
         
         
         glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_INT, NULL,
@@ -215,6 +219,11 @@ int main()
 
         window->SwapBuffers();
         glfwPollEvents();
+
+        if (spawning)
+        {
+            SpawnParticles(window->GetPtr());
+        }
 
         //TIMING
         now = steady_clock::now();
