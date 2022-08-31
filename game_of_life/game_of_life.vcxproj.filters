@@ -49,4 +49,12 @@
     <CopyFileToFolders Include="shaders\fragment.glsl" />
     <CopyFileToFolders Include="shaders\vertex.glsl" />
   </ItemGroup>
+  <ItemGroup>
+    <Image Include="game_of_life.gif">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="sand_water.gif">
+      <Filter>Resource Files</Filter>
+    </Image>
+  </ItemGroup>
 </Project>
